@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Setter
 @AllArgsConstructor
 @Builder
-public class SalesResponseDto {
+public class SaleResponseDto {
     private Long id;
     private String sku;
     private Integer units;
