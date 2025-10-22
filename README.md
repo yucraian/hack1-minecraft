@@ -1,5 +1,52 @@
 # Hackathon #1: Oreo Insight Factory 🍪📈
 
+## Entregables
+
+1. **Código fuente** completo en un repositorio público de GitHub
+2. **Postman Collection** (archivo .json) en el root del repositorio
+3. **README.md** con:
+4. 
+   - **Información del equipo**: Nombres completos y códigos UTEC de todos los integrantes
+   - Giraldo Ruiz Caro  Codigo: 202410013
+   - Ian Yucra   Codigo: 202410145
+   - Franco Gonzales Codigo:202410468
+   - 
+   - Instrucciones para ejecutar el proyecto
+  
+   
+   - Instrucciones para correr el Postman workflow
+  
+   - 
+   - Explicación de la implementación asíncrona
+     @EnableAsync en la app.
+
+ReportRequestedEvent(from, to, branch, emailTo).
+
+Controller publica el evento y retorna 202.
+
+Listener @EventListener + @Async:
+
+Calcula agregados con SalesAggregationService:
+
+totalUnits, totalRevenue, topSku, topBranch.
+
+Llama a GitHub Models (o usa fallback si no responde).
+
+Envía email (Mailtrap/MailDev en dev) con el resumen.
+
+Permisos: CENTRAL puede cualquier branch; BRANCH solo su branch (validado por JWT claims).
+
+Flujo
+
+POST /sales/summary/weekly → valida emailTo, calcula from/to por defecto, publica evento, retorna 202 con requestId.
+
+Listener procesa en background → arma resumen (≤120 palabras, español) → envía email.
+
+Errores síncronos: 400/401/403. Fallas de LLM/mail: log y fallback; el endpoint sigue devolviendo 202.
+   - (Si intentaste el reto) Documentación del endpoint premium
+5. **Variables de entorno**: Entregar por Canvas en formato texto las variables necesarias para ejecutar el proyecto
+
+
 ## Descripción General
 
 ¿A quién no le gusta meter una Oreo 🍪 en un vaso con leche 🥛? 
@@ -444,12 +491,16 @@ La colección ejecutará esta secuencia:
 1. **Código fuente** completo en un repositorio público de GitHub
 2. **Postman Collection** (archivo .json) en el root del repositorio
 3. **README.md** con:
+4. 
    - **Información del equipo**: Nombres completos y códigos UTEC de todos los integrantes
+   - Giraldo Ruiz Caro  Codigo: 202410013
+   - Ian Yucra   Codigo: 202410145
+   - Franco Gonzales Codigo:202410468
    - Instrucciones para ejecutar el proyecto
    - Instrucciones para correr el Postman workflow 
    - Explicación de la implementación asíncrona
    - (Si intentaste el reto) Documentación del endpoint premium
-4. **Variables de entorno**: Entregar por Canvas en formato texto las variables necesarias para ejecutar el proyecto
+5. **Variables de entorno**: Entregar por Canvas en formato texto las variables necesarias para ejecutar el proyecto
 
 ## Criterios de Evaluación
 
