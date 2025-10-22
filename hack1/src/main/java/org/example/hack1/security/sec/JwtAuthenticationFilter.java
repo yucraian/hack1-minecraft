@@ -1,9 +1,28 @@
 package security;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.example.hack1.user.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.util.StringUtils;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private UserRepository userRepository;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -21,7 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (token != null && jwtUtil.validateToken(token)) {
                 String userId = jwtUtil.extractUserId(token);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(
-                        userRepository.findById(userId).get().getUsername()
+                        userRepository.findById(Long.valueOf(userId)).get().getUsername()
                 );
 
                 UsernamePasswordAuthenticationToken authentication =
@@ -44,4 +63,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         return null;
     }
+
 }

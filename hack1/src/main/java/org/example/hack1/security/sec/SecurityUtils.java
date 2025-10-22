@@ -1,7 +1,11 @@
 package security;
 
 
+import org.example.hack1.user.domain.User;
+import org.example.hack1.user.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component

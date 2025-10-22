@@ -4,6 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.Value;
+import org.example.hack1.user.domain.User;
+import org.example.hack1.user.domain.UserRole;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -48,8 +50,8 @@ public class JwtUtil {
     }
 
     public boolean validateToken(String token, User user) {
-        final String userId = extractUserId(token);
-        return (userId.equals(user.getId()) && !isTokenExpired(token));
+        final String username = extractUsername(token);
+        return username.equals(user.getUsername()) && !isTokenExpired(token);
     }
 
     private Claims extractAllClaims(String token) {

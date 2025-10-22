@@ -2,6 +2,9 @@ package controller;
 
 
 import jakarta.validation.Valid;
+import org.example.hack1.sale.domain.SaleService;
+import org.example.hack1.sale.dto.SaleRequestDto;
+import org.example.hack1.sale.dto.SaleResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import security.SalesPermissionService;
+import security.SecurityUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,7 +27,7 @@ import java.util.List;
 public class SalesController {
 
     @Autowired
-    private SalesService salesService;
+    private SaleService salesService;
 
     @Autowired
     private SalesPermissionService permissionService;
@@ -33,22 +38,22 @@ public class SalesController {
     // CREATE - Crear nueva venta
     @PostMapping
     @PreAuthorize("hasAnyRole('ROLE_CENTRAL', 'ROLE_BRANCH')")
-    public ResponseEntity<SaleResponse> createSale(@Valid @RequestBody SaleRequest request) {
+    public ResponseEntity<SaleResponseDto> createSale(@Valid @RequestBody SaleRequestDto request) {
         // Validar permisos de creación
         permissionService.validateSaleCreation(request.getBranch());
 
         // Validar acceso a la sucursal
         permissionService.validateBranchAccess(request.getBranch());
 
-        SaleResponse createdSale = salesService.createSale(request);
+        SaleResponseDto createdSale = salesService.createSale(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdSale);
     }
 
     // READ - Obtener venta por ID
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_CENTRAL', 'ROLE_BRANCH')")
-    public ResponseEntity<SaleResponse> getSale(@PathVariable String id) {
-        SaleResponse sale = salesService.getSaleById(id);
+    public ResponseEntity<SaleResponseDto> getSale(@PathVariable String id) {
+        SaleResponseDto sale = salesService.getSaleById(id);
 
         // Validar que el usuario tenga acceso a esta venta
         permissionService.validateBranchAccess(sale.getBranch());
@@ -59,7 +64,7 @@ public class SalesController {
     // READ - Listar ventas con filtros
     @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_CENTRAL', 'ROLE_BRANCH')")
-    public ResponseEntity<Page<SaleResponse>> getSales(
+    public ResponseEntity<Page<SaleResponseDto>> getSales(
             @RequestParam(required = false) String branch,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
@@ -77,7 +82,7 @@ public class SalesController {
         }
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<SaleResponse> sales = salesService.getSales(branch, from, to, pageable);
+        Page<SaleResponseDto> sales = salesService.getSales(branch, from, to, pageable);
 
         return ResponseEntity.ok(sales);
     }
@@ -85,12 +90,12 @@ public class SalesController {
     // UPDATE - Actualizar venta
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_CENTRAL', 'ROLE_BRANCH')")
-    public ResponseEntity<SaleResponse> updateSale(
+    public ResponseEntity<SaleResponseDto> updateSale(
             @PathVariable String id,
-            @Valid @RequestBody SaleRequest request) {
+            @Valid @RequestBody SaleRequestDto request) {
 
         // Primero obtener la venta para validar permisos
-        SaleResponse existingSale = salesService.getSaleById(id);
+        SaleResponseDto existingSale = salesService.getSaleById(id);
         permissionService.validateBranchAccess(existingSale.getBranch());
 
         // Validar permisos para la nueva branch si se cambia
@@ -99,7 +104,7 @@ public class SalesController {
             permissionService.validateBranchAccess(request.getBranch());
         }
 
-        SaleResponse updatedSale = salesService.updateSale(id, request);
+        SaleResponseDto updatedSale = salesService.updateSale(id, request);
         return ResponseEntity.ok(updatedSale);
     }
 

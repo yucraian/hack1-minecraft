@@ -1,7 +1,13 @@
-package service;
+package org.example.hack1.security.service;
 
-
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.example.hack1.security.dto.AuthResponse;
+import org.example.hack1.security.dto.RegisterRequest;
+import org.example.hack1.security.JwtUtil;
+import org.example.hack1.user.domain.User;
+import org.example.hack1.user.domain.UserRole;
+import org.example.hack1.user.repo.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -11,24 +17,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class AuthService {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
+    // 🟢 LOGIN
     public AuthResponse login(String username, String password) {
         try {
             // Autenticar con Spring Security
@@ -38,18 +38,18 @@ public class AuthService {
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // Obtener usuario desde la base de datos
+            // Buscar usuario en la base de datos
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
             // Generar token JWT
             String token = jwtUtil.generateToken(user);
 
-            // Crear response
+            // Crear respuesta
             AuthResponse response = new AuthResponse();
             response.setToken(token);
             response.setExpiresIn(3600L);
-            response.setRole(user.getRole());
+            response.setRole(user.getUserRole());
             response.setBranch(user.getBranch());
 
             return response;
@@ -59,47 +59,41 @@ public class AuthService {
         }
     }
 
+    // 🟡 REGISTER
     public User register(RegisterRequest request) {
-        // Validar que branch sea obligatorio para BRANCH
-        if (request.getRole() == Role.ROLE_BRANCH &&
+        if (request.getUserRole() == UserRole.BRANCH &&
                 (request.getBranch() == null || request.getBranch().trim().isEmpty())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Branch es obligatorio para usuarios BRANCH");
         }
 
-        // Validar que branch sea null para CENTRAL
-        if (request.getRole() == Role.ROLE_CENTRAL && request.getBranch() != null) {
+        if (request.getUserRole() == UserRole.CENTRAL && request.getBranch() != null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Branch debe ser null para usuarios CENTRAL");
         }
 
-        // Verificar si username ya existe
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Username ya está en uso");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username ya está en uso");
         }
 
-        // Verificar si email ya existe
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Email ya está en uso");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email ya está en uso");
         }
 
-        // Crear usuario
         User user = new User();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(request.getRole());
+        user.setUserRole(request.getUserRole());
         user.setBranch(request.getBranch());
 
         return userRepository.save(user);
     }
 
-    // Método para validar token (opcional)
-    public boolean validateToken(String token) {
+    // 🧩 VALIDAR TOKEN
+    public boolean validateToken(String token, User user) {
         try {
-            return jwtUtil.validateToken(token);
+            return jwtUtil.validateToken(token, user);
         } catch (Exception e) {
             return false;
         }

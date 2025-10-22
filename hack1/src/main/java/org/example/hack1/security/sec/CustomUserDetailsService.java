@@ -1,6 +1,8 @@
 package security;
 
 import jakarta.transaction.Transactional;
+import org.example.hack1.user.domain.User;
+import org.example.hack1.user.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
