@@ -5,6 +5,8 @@ import jakarta.validation.Valid;
 import org.example.hack1.sale.domain.SaleService;
 import org.example.hack1.sale.dto.SaleRequestDto;
 import org.example.hack1.sale.dto.SaleResponseDto;
+import org.example.hack1.security.sec.SalesPermissionService;
+import org.example.hack1.security.sec.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,8 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import security.SalesPermissionService;
-import security.SecurityUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
