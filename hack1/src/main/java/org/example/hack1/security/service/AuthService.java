@@ -45,11 +45,11 @@ public class AuthService {
             // Generar token JWT
             String token = jwtUtil.generateToken(user);
 
-            // Crear respuesta
+            // Crear respuesta - CORREGIDO
             AuthResponse response = new AuthResponse();
             response.setToken(token);
             response.setExpiresIn(3600L);
-            response.setRole(user.getUserRole());
+            response.setUserRole(user.getUserRole());  // Corregido: setUserRole()
             response.setBranch(user.getBranch());
 
             return response;

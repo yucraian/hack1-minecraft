@@ -1,12 +1,14 @@
 package org.example.hack1.sale.application;
 
 import jakarta.validation.Valid;
+import org.example.hack1.async.event.ReportRequestedEvent;
 import org.example.hack1.sale.domain.SaleService;
 import org.example.hack1.sale.dto.SaleRequestDto;
 import org.example.hack1.sale.dto.SaleResponseDto;
 import org.example.hack1.security.sec.SalesPermissionService;
 import org.example.hack1.security.sec.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +34,10 @@ public class SaleController {
 
     @Autowired
     private SalesPermissionService permissionService;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
 
     // CREATE - Crear nueva venta
     @PostMapping
@@ -114,7 +120,6 @@ public class SaleController {
         return ResponseEntity.noContent().build();
     }
 
-    // Endpoint para resumen semanal (ASÍNCRONO)
     @PostMapping("/summary/weekly")
     @PreAuthorize("hasAnyRole('CENTRAL', 'BRANCH')")
     public ResponseEntity<?> generateWeeklySummary(@Valid @RequestBody WeeklySummaryRequest request) {
@@ -136,8 +141,18 @@ public class SaleController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "emailTo es obligatorio");
         }
 
-        // Procesar asíncronamente
-        String requestId = saleService.generateWeeklySummaryAsync(request);
+        // === AQUÍ VA EL NUEVO CÓDIGO ===
+        String requestId = "req_" + System.currentTimeMillis();
+
+        // Calcular fechas por defecto si no vienen
+        LocalDate fromDate = request.getFrom() != null ? request.getFrom() : LocalDate.now().minusDays(7);
+        LocalDate toDate = request.getTo() != null ? request.getTo() : LocalDate.now();
+
+        // Publicar evento asíncrono
+        eventPublisher.publishEvent(new ReportRequestedEvent(
+                fromDate, toDate, branch, request.getEmailTo(), requestId
+        ));
+        // === FIN DEL NUEVO CÓDIGO ===
 
         // Response inmediata
         SummaryResponse response = new SummaryResponse();
