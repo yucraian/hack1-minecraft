@@ -2,7 +2,7 @@ package org.example.hack1.email;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.hack1.async.SalesAggregationService;
+import org.example.hack1.sale.domain.SalesAggregationService;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 

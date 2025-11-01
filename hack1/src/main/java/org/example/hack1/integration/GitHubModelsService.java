@@ -1,6 +1,7 @@
-package org.example.hack1.async;
+package org.example.hack1.integration;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.hack1.sale.domain.SalesAggregationService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;

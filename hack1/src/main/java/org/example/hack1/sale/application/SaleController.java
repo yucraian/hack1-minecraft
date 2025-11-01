@@ -1,7 +1,7 @@
 package org.example.hack1.sale.application;
 
 import jakarta.validation.Valid;
-import org.example.hack1.async.event.ReportRequestedEvent;
+import org.example.hack1.sale.domain.event.ReportRequestedEvent;
 import org.example.hack1.sale.domain.SaleService;
 import org.example.hack1.sale.dto.SaleRequestDto;
 import org.example.hack1.sale.dto.SaleResponseDto;

@@ -1,8 +1,9 @@
-package org.example.hack1.async;
+package org.example.hack1.sale.domain;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.hack1.async.event.ReportRequestedEvent;
+import org.example.hack1.integration.GitHubModelsService;
+import org.example.hack1.sale.domain.event.ReportRequestedEvent;
 import org.example.hack1.email.EmailService;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;

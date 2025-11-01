@@ -1,4 +1,4 @@
-package org.example.hack1.async.event;
+package org.example.hack1.sale.domain.event;
 
 import java.time.LocalDate;
 

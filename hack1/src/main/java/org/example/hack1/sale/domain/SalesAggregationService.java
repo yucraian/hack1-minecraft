@@ -1,7 +1,6 @@
-package org.example.hack1.async;
+package org.example.hack1.sale.domain;
 
 import lombok.RequiredArgsConstructor;
-import org.example.hack1.sale.domain.Sale;
 import org.example.hack1.sale.repo.SaleRepository;
 import org.springframework.stereotype.Service;
 
