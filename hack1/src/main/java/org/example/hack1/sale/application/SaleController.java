@@ -1,6 +1,5 @@
 package org.example.hack1.sale.application;
 
-
 import jakarta.validation.Valid;
 import org.example.hack1.sale.domain.SaleService;
 import org.example.hack1.sale.dto.SaleRequestDto;
@@ -26,35 +25,33 @@ import java.time.LocalDateTime;
 public class SaleController {
 
     @Autowired
-    private SaleService salesService;
-
-    @Autowired
-    private SalesPermissionService permissionService;
+    private SaleService saleService;
 
     @Autowired
     private SecurityUtils securityUtils;
 
+    @Autowired
+    private SalesPermissionService permissionService;
+
     // CREATE - Crear nueva venta
     @PostMapping
-    @PreAuthorize("hasAnyRole('ROLE_CENTRAL', 'ROLE_BRANCH')")
+    @PreAuthorize("hasAnyRole('CENTRAL', 'BRANCH')")
     public ResponseEntity<SaleResponseDto> createSale(@Valid @RequestBody SaleRequestDto request) {
-        // Validar permisos de creación
+        // Validar permisos usando tu SalesPermissionService
         permissionService.validateSaleCreation(request.getBranch());
 
-        // Validar acceso a la sucursal
-        permissionService.validateBranchAccess(request.getBranch());
-
-        SaleResponseDto createdSale = salesService.createSale(request);
+        String username = securityUtils.getCurrentUsername();
+        SaleResponseDto createdSale = saleService.createSale(request, username);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdSale);
     }
 
     // READ - Obtener venta por ID
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ROLE_CENTRAL', 'ROLE_BRANCH')")
-    public ResponseEntity<SaleResponseDto> getSale(@PathVariable String id) {
-        SaleResponseDto sale = salesService.getSaleById(id);
+    @PreAuthorize("hasAnyRole('CENTRAL', 'BRANCH')")
+    public ResponseEntity<SaleResponseDto> getSale(@PathVariable Long id) {
+        SaleResponseDto sale = saleService.getSaleById(id);
 
-        // Validar que el usuario tenga acceso a esta venta
+        // Validar permisos usando tu SalesPermissionService
         permissionService.validateBranchAccess(sale.getBranch());
 
         return ResponseEntity.ok(sale);
@@ -62,7 +59,7 @@ public class SaleController {
 
     // READ - Listar ventas con filtros
     @GetMapping
-    @PreAuthorize("hasAnyRole('ROLE_CENTRAL', 'ROLE_BRANCH')")
+    @PreAuthorize("hasAnyRole('CENTRAL', 'BRANCH')")
     public ResponseEntity<Page<SaleResponseDto>> getSales(
             @RequestParam(required = false) String branch,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
@@ -75,58 +72,63 @@ public class SaleController {
             branch = securityUtils.getCurrentUserBranch();
         }
 
-        // Si se especifica branch, validar acceso
+        // Validar acceso si se especifica branch
         if (branch != null) {
             permissionService.validateBranchAccess(branch);
         }
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<SaleResponseDto> sales = salesService.getSales(branch, from, to, pageable);
-
+        Page<SaleResponseDto> sales = saleService.getSales(branch, from, to, pageable);
         return ResponseEntity.ok(sales);
     }
 
     // UPDATE - Actualizar venta
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ROLE_CENTRAL', 'ROLE_BRANCH')")
+    @PreAuthorize("hasAnyRole('CENTRAL', 'BRANCH')")
     public ResponseEntity<SaleResponseDto> updateSale(
-            @PathVariable String id,
+            @PathVariable Long id,
             @Valid @RequestBody SaleRequestDto request) {
 
         // Primero obtener la venta para validar permisos
-        SaleResponseDto existingSale = salesService.getSaleById(id);
+        SaleResponseDto existingSale = saleService.getSaleById(id);
+
+        // Validar permisos sobre la venta existente
         permissionService.validateBranchAccess(existingSale.getBranch());
 
-        // Validar permisos para la nueva branch si se cambia
-        if (request.getBranch() != null && !request.getBranch().equals(existingSale.getBranch())) {
-            permissionService.validateSaleCreation(request.getBranch());
-            permissionService.validateBranchAccess(request.getBranch());
+        // Validar que usuarios BRANCH no cambien la sucursal
+        if (!securityUtils.isCentralUser() && request.getBranch() != null &&
+                !request.getBranch().equals(existingSale.getBranch())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "No puedes cambiar la sucursal de la venta");
         }
 
-        SaleResponseDto updatedSale = salesService.updateSale(id, request);
+        SaleResponseDto updatedSale = saleService.updateSale(id, request);
         return ResponseEntity.ok(updatedSale);
     }
 
     // DELETE - Eliminar venta (solo CENTRAL)
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_CENTRAL')")
-    public ResponseEntity<Void> deleteSale(@PathVariable String id) {
-        salesService.deleteSale(id);
+    @PreAuthorize("hasRole('CENTRAL')")
+    public ResponseEntity<Void> deleteSale(@PathVariable Long id) {
+        saleService.deleteSale(id);
         return ResponseEntity.noContent().build();
     }
 
     // Endpoint para resumen semanal (ASÍNCRONO)
     @PostMapping("/summary/weekly")
-    @PreAuthorize("hasAnyRole('ROLE_CENTRAL', 'ROLE_BRANCH')")
-    public ResponseEntity<?> generateWeeklySummary(
-            @RequestBody WeeklySummaryRequest request) {
+    @PreAuthorize("hasAnyRole('CENTRAL', 'BRANCH')")
+    public ResponseEntity<?> generateWeeklySummary(@Valid @RequestBody WeeklySummaryRequest request) {
 
         // Validar permisos de branch
-        if (request.getBranch() != null) {
-            permissionService.validateBranchAccess(request.getBranch());
-        } else if (!securityUtils.isCentralUser()) {
-            // Si es BRANCH y no especifica branch, usar su branch
-            request.setBranch(securityUtils.getCurrentUserBranch());
+        String branch = request.getBranch();
+        if (!securityUtils.isCentralUser()) {
+            branch = securityUtils.getCurrentUserBranch();
+            request.setBranch(branch); // Asegurar que use la branch del usuario
+        }
+
+        // Validar acceso a la branch solicitada
+        if (branch != null) {
+            permissionService.validateBranchAccess(branch);
         }
 
         // Validar email obligatorio
@@ -134,8 +136,8 @@ public class SaleController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "emailTo es obligatorio");
         }
 
-        // Procesar asíncronamente (esto lo implementarás después)
-        String requestId = salesService.generateWeeklySummaryAsync(request);
+        // Procesar asíncronamente
+        String requestId = saleService.generateWeeklySummaryAsync(request);
 
         // Response inmediata
         SummaryResponse response = new SummaryResponse();
@@ -153,6 +155,9 @@ public class SaleController {
         private LocalDate from;
         private LocalDate to;
         private String branch;
+
+        @jakarta.validation.constraints.NotBlank
+        @jakarta.validation.constraints.Email
         private String emailTo;
 
         // Getters and Setters

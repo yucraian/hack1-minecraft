@@ -10,16 +10,17 @@ import org.example.hack1.user.domain.User;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "sales")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Sale{
+public class Sale {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String sku;
 
     @Column(nullable = false)
@@ -34,8 +35,7 @@ public class Sale{
     @Column(nullable = false)
     private LocalDateTime soldAt;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
-
 }
