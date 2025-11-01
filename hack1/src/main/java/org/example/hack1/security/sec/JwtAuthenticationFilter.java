@@ -1,14 +1,12 @@
-package security;
+package org.example.hack1.security.sec;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.example.hack1.user.repo.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,7 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String token = getTokenFromRequest(request);
 
-            if (token != null && jwtUtil.validateToken(token)) {
+            if (token != null && jwtUtil.validateToken(token, user)) {
                 String userId = jwtUtil.extractUserId(token);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(
                         userRepository.findById(Long.valueOf(userId)).get().getUsername()

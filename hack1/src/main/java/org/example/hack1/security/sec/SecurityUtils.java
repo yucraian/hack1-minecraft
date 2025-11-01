@@ -1,4 +1,4 @@
-package security;
+package org.example.hack1.security.sec;
 
 
 import org.example.hack1.user.domain.User;

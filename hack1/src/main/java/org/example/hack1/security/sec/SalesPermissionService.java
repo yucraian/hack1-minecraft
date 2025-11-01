@@ -1,4 +1,4 @@
-package security;
+package org.example.hack1.security.sec;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

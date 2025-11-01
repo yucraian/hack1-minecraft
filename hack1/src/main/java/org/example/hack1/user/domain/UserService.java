@@ -6,6 +6,7 @@ import org.example.hack1.user.dto.UserResponseDto;
 import org.example.hack1.user.repo.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 

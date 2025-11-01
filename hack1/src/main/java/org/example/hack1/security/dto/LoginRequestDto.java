@@ -1,4 +1,4 @@
-package dto;
+package org.example.hack1.security.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LonginRequestDto {
+public class LoginRequestDto {
     @NotBlank
     private String username;
 

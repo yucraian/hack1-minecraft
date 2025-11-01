@@ -3,7 +3,7 @@ package org.example.hack1.security.service;
 import lombok.RequiredArgsConstructor;
 import org.example.hack1.security.dto.AuthResponse;
 import org.example.hack1.security.dto.RegisterRequest;
-import org.example.hack1.security.JwtUtil;
+import org.example.hack1.security.sec.JwtUtil;
 import org.example.hack1.user.domain.User;
 import org.example.hack1.user.domain.UserRole;
 import org.example.hack1.user.repo.UserRepository;

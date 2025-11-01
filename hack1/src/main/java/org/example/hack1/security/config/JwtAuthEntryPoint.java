@@ -1,4 +1,4 @@
-package config;
+package org.example.hack1.security.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;

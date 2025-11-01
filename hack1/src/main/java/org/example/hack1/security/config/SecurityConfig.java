@@ -1,6 +1,8 @@
-package config;
+package org.example.hack1.security.config;
 
 import lombok.RequiredArgsConstructor;
+import org.example.hack1.security.config.JwtAuthEntryPoint;
+import org.example.hack1.security.sec.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class SalesRequestDto {
+public class SaleRequestDto {
 
     @NotBlank(message = "El SKU es obligatorio")
     private String sku;

@@ -1,9 +1,10 @@
-package dto;
+package org.example.hack1.security.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.hack1.user.domain.UserRole;
 
 @Data
 @NoArgsConstructor

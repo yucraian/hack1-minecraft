@@ -1,4 +1,4 @@
-package controller;
+package org.example.hack1.sale.application;
 
 
 import jakarta.validation.Valid;
@@ -20,11 +20,10 @@ import security.SecurityUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @RestController
 @RequestMapping("/sales")
-public class SalesController {
+public class SaleController {
 
     @Autowired
     private SaleService salesService;

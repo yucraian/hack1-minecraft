@@ -1,9 +1,9 @@
-package controller;
+package org.example.hack1.security.controller;
 
-import org.example.hack1.security.dto.AuthResponse;
-import org.example.hack1.security.dto.LoginRequest;
-import org.example.hack1.security.dto.RegisterRequest;
 import jakarta.validation.Valid;
+import org.example.hack1.security.dto.AuthResponse;
+import org.example.hack1.security.dto.LoginRequestDto;
+import org.example.hack1.security.dto.RegisterRequest;
 import org.example.hack1.user.domain.User;
 import org.example.hack1.user.domain.UserRole;
 import org.example.hack1.user.repo.UserRepository;
@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import security.JwtUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +37,7 @@ public class AuthController {
     private UserRepository userRepository;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private org.example.hack1.security.sec.JwtUtil jwtUtil;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -75,7 +74,7 @@ public class AuthController {
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(request.getUserRole());
+        user.setUserRole(request.getUserRole());
         user.setBranch(request.getBranch());
 
         User savedUser = userRepository.save(user);
@@ -85,14 +84,14 @@ public class AuthController {
         response.put("id", savedUser.getId());
         response.put("username", savedUser.getUsername());
         response.put("email", savedUser.getEmail());
-        response.put("role", savedUser.getRole());
+        response.put("role", savedUser.getUserRole());
         response.put("branch", savedUser.getBranch());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDto request) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
@@ -108,7 +107,7 @@ public class AuthController {
             AuthResponse response = new AuthResponse();
             response.setToken(token);
             response.setExpiresIn(3600L);
-            response.setRole(user.getRole());
+            response.setUserRole(user.getUserRole());
             response.setBranch(user.getBranch());
 
             return ResponseEntity.ok(response);
